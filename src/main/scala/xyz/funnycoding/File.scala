@@ -5,7 +5,7 @@ import scalaz.zio.{IO, ZIO}
 import scala.io.Source
 
 trait File {
-  val instance: File.Service
+  val service: File.Service
 }
 object File {
   trait Service {
@@ -13,7 +13,7 @@ object File {
   }
 }
 trait SyncFile extends File {
-  override val instance: File.Service = (fileName: String) => ZIO
+  override val service: File.Service = (fileName: String) => ZIO
     .effect(Source.fromResource(fileName).getLines())
     .refineOrDie {
       case _: Exception => FileNotFoundError(s"$fileName file not found")
@@ -23,5 +23,5 @@ object SyncFile extends SyncFile
 
 object FileReader {
   def read(filename: String): ZIO[File, FileNotFoundError, Iterator[String]] =
-    ZIO.accessM(_.instance read filename)
+    ZIO.accessM(_.service read filename)
 }
